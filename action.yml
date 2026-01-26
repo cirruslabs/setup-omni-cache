@@ -1,24 +1,40 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: Setup omni-cache
+description: Install and run omni-cache as a background sidecar for CI caching
+author: Cirrus Labs
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: heart
-  color: red
+  icon: database
+  color: blue
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: Your input description here
+  bucket:
+    description: 'S3 bucket name for cache storage'
     required: true
-    default: '1000'
+  prefix:
+    description: 'Prefix for cache objects'
+    required: false
+    default: ''
+  host:
+    description: 'Listen address for omni-cache (host:port format)'
+    required: false
+    default: 'localhost:12321'
+  version:
+    description:
+      'omni-cache version to install (e.g., v0.7.0). Defaults to latest.'
+    required: false
+    default: 'latest'
 
-# Define your outputs here.
 outputs:
-  time:
-    description: Your output description here
+  cache-endpoint:
+    description:
+      'The HTTP endpoint for the cache (e.g., http://localhost:12321)'
+  cache-socket:
+    description: 'The Unix socket path for the cache'
+  version:
+    description: 'The installed omni-cache version'
 
 runs:
   using: node24
   main: dist/index.js
+  post: dist/post.js
+  post-if: always()

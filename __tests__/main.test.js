@@ -1,62 +1,155 @@
 /**
  * Unit tests for the action's main functionality, src/main.js
- *
- * To mock dependencies in ESM, you can create fixtures that export mock
- * functions and objects. For example, the core module is mocked in this test,
- * so that the actual '@actions/core' module is not imported.
  */
 import { jest } from '@jest/globals'
 import * as core from '../__fixtures__/core.js'
-import { wait } from '../__fixtures__/wait.js'
+
+const mockInstall = {
+  installOmniCache: jest.fn()
+}
+
+let mockChildInstance
+
+const mockSpawn = jest.fn()
+
+const mockChildProcess = {
+  spawn: mockSpawn
+}
+
+const mockFs = {
+  openSync: jest.fn().mockReturnValue(3),
+  closeSync: jest.fn()
+}
+
+const mockOs = {
+  tmpdir: jest.fn().mockReturnValue('/tmp'),
+  homedir: jest.fn().mockReturnValue('/home/user')
+}
+
+const mockPath = {
+  join: jest.fn((...args) => args.join('/'))
+}
 
 // Mocks should be declared before the module being tested is imported.
 jest.unstable_mockModule('@actions/core', () => core)
-jest.unstable_mockModule('../src/wait.js', () => ({ wait }))
+jest.unstable_mockModule('../src/install.js', () => mockInstall)
+jest.unstable_mockModule('child_process', () => mockChildProcess)
+jest.unstable_mockModule('fs', () => mockFs)
+jest.unstable_mockModule('os', () => mockOs)
+jest.unstable_mockModule('path', () => mockPath)
 
-// The module being tested should be imported dynamically. This ensures that the
-// mocks are used in place of any actual dependencies.
+// Mock global fetch
+global.fetch = jest.fn()
+
+// The module being tested should be imported dynamically.
 const { run } = await import('../src/main.js')
 
 describe('main.js', () => {
   beforeEach(() => {
-    // Set the action's inputs as return values from core.getInput().
-    core.getInput.mockImplementation(() => '500')
+    jest.clearAllMocks()
 
-    // Mock the wait function so that it does not actually wait.
-    wait.mockImplementation(() => Promise.resolve('done!'))
+    mockChildInstance = {
+      pid: 12345,
+      unref: jest.fn()
+    }
+    mockSpawn.mockReturnValue(mockChildInstance)
+
+    mockInstall.installOmniCache.mockResolvedValue({
+      path: '/path/to/omni-cache',
+      version: 'v0.7.0'
+    })
+
+    core.getInput.mockImplementation((name) => {
+      const inputs = {
+        bucket: 'test-bucket',
+        prefix: 'test-prefix',
+        host: 'localhost:12321',
+        version: 'latest'
+      }
+      return inputs[name] || ''
+    })
+
+    mockFs.openSync.mockReturnValue(3)
+    mockOs.tmpdir.mockReturnValue('/tmp')
+    mockOs.homedir.mockReturnValue('/home/user')
+
+    // Mock successful health check
+    global.fetch.mockResolvedValue({ ok: true })
   })
 
-  afterEach(() => {
-    jest.resetAllMocks()
-  })
-
-  it('Sets the time output', async () => {
+  it('installs and starts omni-cache', async () => {
     await run()
 
-    // Verify the time output was set.
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      // Simple regex to match a time string in the format HH:MM:SS.
-      expect.stringMatching(/^\d{2}:\d{2}:\d{2}/)
+    expect(mockInstall.installOmniCache).toHaveBeenCalledWith('latest')
+    expect(mockSpawn).toHaveBeenCalledWith(
+      '/path/to/omni-cache',
+      ['sidecar'],
+      expect.objectContaining({
+        detached: true
+      })
+    )
+    expect(core.saveState).toHaveBeenCalledWith('omni-cache-pid', '12345')
+    expect(core.setOutput).toHaveBeenCalledWith(
+      'cache-endpoint',
+      'http://localhost:12321'
     )
   })
 
-  it('Sets a failed status', async () => {
-    // Clear the getInput mock and return an invalid value.
-    core.getInput.mockClear().mockReturnValueOnce('this is not a number')
+  it('sets environment variables correctly', async () => {
+    await run()
 
-    // Clear the wait mock and return a rejected promise.
-    wait
-      .mockClear()
-      .mockRejectedValueOnce(new Error('milliseconds is not a number'))
+    expect(mockSpawn).toHaveBeenCalled()
+    const spawnCall = mockSpawn.mock.calls[0]
+    const env = spawnCall[2].env
+
+    expect(env.OMNI_CACHE_BUCKET).toBe('test-bucket')
+    expect(env.OMNI_CACHE_PREFIX).toBe('test-prefix')
+    expect(env.OMNI_CACHE_HOST).toBe('localhost:12321')
+  })
+
+  it('sets version output', async () => {
+    await run()
+
+    expect(core.setOutput).toHaveBeenCalledWith('version', 'v0.7.0')
+  })
+
+  it('sets cache-socket output', async () => {
+    await run()
+
+    expect(core.setOutput).toHaveBeenCalledWith(
+      'cache-socket',
+      expect.stringContaining('.cirruslabs/omni-cache.sock')
+    )
+  })
+
+  it('fails when bucket is not provided', async () => {
+    core.getInput.mockImplementation((name, opts) => {
+      if (name === 'bucket' && opts?.required) {
+        throw new Error('Input required and not supplied: bucket')
+      }
+      return ''
+    })
 
     await run()
 
-    // Verify that the action was marked as failed.
-    expect(core.setFailed).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds is not a number'
+    expect(core.setFailed).toHaveBeenCalledWith(
+      'Input required and not supplied: bucket'
     )
+  })
+
+  it('fails when health check times out', async () => {
+    global.fetch.mockRejectedValue(new Error('Connection refused'))
+
+    await run()
+
+    expect(core.setFailed).toHaveBeenCalledWith(
+      expect.stringContaining('failed to become healthy')
+    )
+  }, 35000)
+
+  it('detaches child process', async () => {
+    await run()
+
+    expect(mockChildInstance.unref).toHaveBeenCalled()
   })
 })

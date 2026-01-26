@@ -22,7 +22,7 @@ permissions:
 jobs:
   licensed:
     name: Check Licenses
-    runs-on: ubuntu-latest
+    runs-on: ghcr.io/cirruslabs/ubuntu-runner-amd64:24.04-sm
 
     steps:
       - name: Checkout

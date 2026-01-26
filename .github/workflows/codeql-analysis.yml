@@ -19,7 +19,7 @@ permissions:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: ghcr.io/cirruslabs/ubuntu-runner-amd64:24.04-sm
 
     strategy:
       fail-fast: false

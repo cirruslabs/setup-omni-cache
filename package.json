@@ -1,8 +1,8 @@
 {
-  "name": "javascript-action",
-  "description": "GitHub Actions JavaScript Template",
-  "version": "0.0.0",
-  "author": "",
+  "name": "setup-omni-cache",
+  "description": "GitHub Action to install and run omni-cache as a background sidecar",
+  "version": "1.0.0",
+  "author": "Cirrus Labs",
   "type": "module",
   "private": true,
   "homepage": "https://github.com/actions/javascript-action#readme",
@@ -37,7 +37,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.11.1"
+    "@actions/core": "^1.11.1",
+    "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
     "@eslint/compat": "^1.4.0",
