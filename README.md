@@ -3,9 +3,13 @@
 [![CI](https://github.com/cirruslabs/setup-omni-cache/actions/workflows/ci.yml/badge.svg)](https://github.com/cirruslabs/setup-omni-cache/actions/workflows/ci.yml)
 [![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
-A GitHub Action to install and run [omni-cache](https://github.com/cirruslabs/omni-cache) as a background sidecar for CI caching.
+A GitHub Action to install and run
+[omni-cache](https://github.com/cirruslabs/omni-cache) as a background sidecar
+for CI caching.
 
-omni-cache is a multi-protocol cache sidecar that proxies cache requests to S3, keeping cache traffic local to the runner and eliminating the need for tools to have direct S3 credentials.
+omni-cache is a multi-protocol cache sidecar that proxies cache requests to S3,
+keeping cache traffic local to the runner and eliminating the need for tools to
+have direct S3 credentials.
 
 ## Usage
 
@@ -29,20 +33,20 @@ steps:
 
 ## Inputs
 
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `bucket` | Yes | - | S3 bucket name for cache storage |
-| `prefix` | No | `''` | Prefix for cache object keys |
-| `host` | No | `localhost:12321` | Listen address (host:port format) |
-| `version` | No | `latest` | omni-cache version to install (e.g., `v0.7.0`) |
+| Input     | Required | Default           | Description                                    |
+| --------- | -------- | ----------------- | ---------------------------------------------- |
+| `bucket`  | Yes      | -                 | S3 bucket name for cache storage               |
+| `prefix`  | No       | `''`              | Prefix for cache object keys                   |
+| `host`    | No       | `localhost:12321` | Listen address (host:port format)              |
+| `version` | No       | `latest`          | omni-cache version to install (e.g., `v0.7.0`) |
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
+| Output           | Description                                                      |
+| ---------------- | ---------------------------------------------------------------- |
 | `cache-endpoint` | The HTTP endpoint for the cache (e.g., `http://localhost:12321`) |
-| `cache-socket` | The Unix socket path for the cache |
-| `version` | The installed omni-cache version |
+| `cache-socket`   | The Unix socket path for the cache                               |
+| `version`        | The installed omni-cache version                                 |
 
 ## Supported Protocols
 
@@ -63,9 +67,11 @@ When the workflow job completes, the action automatically:
 
 ## AWS Configuration
 
-omni-cache uses the standard AWS SDK credential chain. You can provide credentials via:
+omni-cache uses the standard AWS SDK credential chain. You can provide
+credentials via:
 
-- Environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`)
+- Environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+  `AWS_REGION`)
 - IAM roles (for self-hosted runners on EC2)
 - OIDC authentication with `aws-actions/configure-aws-credentials`
 
