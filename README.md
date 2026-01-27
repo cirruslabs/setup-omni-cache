@@ -16,6 +16,7 @@ have direct S3 credentials.
 ```yaml
 steps:
   - name: Setup omni-cache
+    id: cache
     uses: cirruslabs/setup-omni-cache@v1
     with:
       bucket: my-cache-bucket
@@ -27,8 +28,8 @@ steps:
   # Your build steps can now use the cache endpoint
   - name: Build with cache
     run: |
-      # Configure your build tool to use http://localhost:12321 as cache endpoint
-      bazel build //... --remote_cache=http://localhost:12321
+      # Configure your build tool to use the cache endpoint output
+      bazel build //... --remote_cache=${{ steps.cache.outputs.cache-endpoint }}
 ```
 
 ## Inputs
