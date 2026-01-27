@@ -52,7 +52,7 @@ steps:
 
 omni-cache supports multiple caching protocols:
 
-- **HTTP Cache** - Simple GET/PUT/POST for tools like Bazel, Gradle, curl
+- **HTTP Cache** - Simple GET/PUT/POST for tools like Bazel, Gradle, cURL
 - **GitHub Actions Cache v1/v2** - Compatible with actions/cache
 - **Azure Blob** - For GHA v2 clients with range support
 - **LLVM Cache** - gRPC-based cache for Xcode/LLVM compilers
@@ -62,8 +62,8 @@ omni-cache supports multiple caching protocols:
 When the workflow job completes, the action automatically:
 
 1. Fetches and displays cache statistics (hits, misses, hit rate)
-2. Adds a summary table to the GitHub job summary
-3. Gracefully shuts down the omni-cache process
+1. Adds a summary table to the GitHub job summary
+1. Gracefully shuts down the omni-cache process
 
 ## AWS Configuration
 

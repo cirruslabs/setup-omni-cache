@@ -14,7 +14,8 @@
 ## Build, Test, and Development Commands
 
 ```bash
-npm install               # Install dependencies (Node >= 20; .node-version pins 24.4.0)
+npm install               # Install dependencies (Node >= 20;
+                          # .node-version pins 24.4.0)
 npm run bundle            # Format + build action into dist/
 npm run package           # Build dist/ only (Rollup)
 npm run package:watch     # Rebuild dist/ on changes

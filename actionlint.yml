@@ -4,3 +4,10 @@ paths:
   .github/workflows/**/*.{yml,yaml}:
     ignore:
       - invalid runner name "node24"
+
+self-hosted-runner:
+  labels:
+    - self-hosted
+    - linux
+    - x64
+    - ghcr.io/cirruslabs/ubuntu-runner-amd64:24.04-sm
