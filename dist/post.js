@@ -38224,7 +38224,28 @@ async function fetchStats(host) {
   try {
     const response = await fetch(`${url}/stats`);
     if (response.ok) {
-      const stats = await response.json();
+      const bodyText =
+        typeof response.text === 'function' ? await response.text() : '';
+      const trimmed = (bodyText || '').replace(/^\uFEFF/, '').trim();
+      if (!trimmed) {
+        coreExports.debug('omni-cache stats endpoint returned empty response');
+        return null
+      }
+
+      if (!/^[{[]/.test(trimmed)) {
+        coreExports.debug(
+          'omni-cache stats endpoint returned non-JSON response; skipping stats'
+        );
+        return null
+      }
+
+      let stats;
+      try {
+        stats = JSON.parse(trimmed);
+      } catch (error) {
+        coreExports.warning(`Could not parse cache statistics JSON: ${error.message}`);
+        return null
+      }
 
       coreExports.info('=== omni-cache Statistics ===');
       coreExports.info(JSON.stringify(stats, null, 2));

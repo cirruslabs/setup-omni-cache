@@ -73,6 +73,6 @@ jobs:
 
       - name: Print Outputs
         run: |
-          echo "Cache endpoint: ${{ steps.test-action.outputs.cache-endpoint }}"
+          echo "Cache address: ${{ steps.test-action.outputs.cache-address }}"
           echo "Cache socket: ${{ steps.test-action.outputs.cache-socket }}"
           echo "Version: ${{ steps.test-action.outputs.version }}"
