@@ -8,7 +8,7 @@ A GitHub Action to install and run
 for CI caching.
 
 omni-cache is a multi-protocol cache sidecar that proxies cache requests directly to an S3-compatible storage.
-Ideal for self-hosting runners.
+Ideal for self-hosted runners.
 
 ## Usage
 
@@ -16,7 +16,7 @@ Ideal for self-hosting runners.
 steps:
   - name: Setup omni-cache
     id: cache
-    uses: cirruslabs/setup-omni-cache@v1.0.1
+    uses: cirruslabs/setup-omni-cache@v1
     with:
       bucket: ci-omni-cache
       s3-endpoint: ${{ secrets.S3_ENDPOINT }} # can be R2, for example
