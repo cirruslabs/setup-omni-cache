@@ -4,9 +4,13 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 1
     groups:
-      actions-minor:
+      github-actions:
+        patterns:
+          - '*'
         update-types:
+          - major
           - minor
           - patch
 
@@ -14,13 +18,12 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 1
     groups:
-      npm-development:
-        dependency-type: development
+      npm:
+        patterns:
+          - '*'
         update-types:
+          - major
           - minor
-          - patch
-      npm-production:
-        dependency-type: production
-        update-types:
           - patch
