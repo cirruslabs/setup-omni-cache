@@ -34,12 +34,13 @@ steps:
 
 ## Inputs
 
-| Input     | Required | Default           | Description                                    |
-| --------- | -------- | ----------------- | ---------------------------------------------- |
-| `bucket`  | Yes      | -                 | S3 bucket name for cache storage               |
-| `prefix`  | No       | `''`              | Prefix for cache object keys                   |
-| `host`    | No       | `localhost:12321` | Listen address (host:port format)              |
-| `version` | No       | `latest`          | omni-cache version to install (e.g., `v0.7.0`) |
+| Input         | Required | Default           | Description                                           |
+| ------------- | -------- | ----------------- | ----------------------------------------------------- |
+| `bucket`      | Yes      | -                 | S3 bucket name for cache storage                      |
+| `prefix`      | No       | `''`              | Prefix for cache object keys                          |
+| `host`        | No       | `localhost:12321` | Listen address (host:port format)                     |
+| `s3-endpoint` | No       | `''`              | S3 endpoint override (e.g., `https://s3.example.com`) |
+| `version`     | No       | `latest`          | omni-cache version to install (e.g., `v0.7.0`)        |
 
 ## Outputs
 
@@ -75,6 +76,10 @@ credentials via:
   `AWS_REGION`)
 - IAM roles (for self-hosted runners on EC2)
 - OIDC authentication with `aws-actions/configure-aws-credentials`
+
+For S3-compatible services (e.g., MinIO or LocalStack), set the `s3-endpoint`
+input to a full URL. omni-cache will use path-style S3 requests for
+compatibility.
 
 ### Using OIDC Authentication
 

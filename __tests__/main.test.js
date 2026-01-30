@@ -64,6 +64,7 @@ describe('main.js', () => {
         bucket: 'test-bucket',
         prefix: 'test-prefix',
         host: 'localhost:12321',
+        's3-endpoint': 'https://s3.example.com',
         version: 'latest'
       }
       return inputs[name] || ''
@@ -105,6 +106,7 @@ describe('main.js', () => {
     expect(env.OMNI_CACHE_BUCKET).toBe('test-bucket')
     expect(env.OMNI_CACHE_PREFIX).toBe('test-prefix')
     expect(env.OMNI_CACHE_HOST).toBe('localhost:12321')
+    expect(env.OMNI_CACHE_S3_ENDPOINT).toBe('https://s3.example.com')
   })
 
   it('sets version output', async () => {

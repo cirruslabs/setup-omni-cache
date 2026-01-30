@@ -18,6 +18,10 @@ inputs:
     description: 'Listen address for omni-cache (host:port format)'
     required: false
     default: 'localhost:12321'
+  s3-endpoint:
+    description: 'S3 endpoint override (e.g., https://s3.example.com)'
+    required: false
+    default: ''
   version:
     description:
       'omni-cache version to install (e.g., v0.7.0). Defaults to latest.'

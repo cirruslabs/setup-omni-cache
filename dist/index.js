@@ -40932,6 +40932,7 @@ async function run() {
     const bucket = coreExports.getInput('bucket', { required: true });
     const prefix = coreExports.getInput('prefix');
     const host = coreExports.getInput('host') || 'localhost:12321';
+    const s3Endpoint = coreExports.getInput('s3-endpoint');
     const version = coreExports.getInput('version') || 'latest';
 
     coreExports.info(`Setting up omni-cache ${version}...`);
@@ -40950,6 +40951,9 @@ async function run() {
 
     if (prefix) {
       env.OMNI_CACHE_PREFIX = prefix;
+    }
+    if (s3Endpoint) {
+      env.OMNI_CACHE_S3_ENDPOINT = s3Endpoint;
     }
 
     // Create log file for omni-cache output
