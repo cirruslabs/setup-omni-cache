@@ -104,6 +104,9 @@ export async function run() {
     // Install omni-cache
     const { path: binaryPath, version: installedVersion } =
       await installOmniCache(version)
+    if (version === 'latest') {
+      core.info(`Resolved omni-cache version: ${installedVersion}`)
+    }
     core.setOutput('version', installedVersion)
 
     // Prepare environment variables for omni-cache
