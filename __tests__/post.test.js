@@ -39,7 +39,6 @@ global.fetch = jest.fn()
 
 // Mock process.kill
 const originalKill = process.kill
-process.kill = jest.fn()
 
 const { run } = await import('../src/post.js')
 
@@ -76,6 +75,7 @@ describe('post.js', () => {
       json: () => Promise.resolve({ hits: 100, misses: 50 })
     })
 
+    process.kill = jest.fn()
     // Process exits immediately after SIGTERM
     process.kill.mockImplementation((pid, signal) => {
       if (signal === 0) throw { code: 'ESRCH' }
@@ -87,9 +87,6 @@ describe('post.js', () => {
 
   afterEach(() => {
     jest.clearAllMocks()
-  })
-
-  afterAll(() => {
     process.kill = originalKill
   })
 
