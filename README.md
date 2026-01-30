@@ -7,8 +7,8 @@ A GitHub Action to install and run
 [omni-cache](https://github.com/cirruslabs/omni-cache) as a background sidecar
 for CI caching.
 
-omni-cache is a multi-protocol cache sidecar that proxies cache requests directly to an S3-compatible storage.
-Ideal for self-hosted runners.
+omni-cache is a multi-protocol cache sidecar that proxies cache requests
+directly to an S3-compatible storage. Ideal for self-hosted runners.
 
 ## Usage
 
@@ -58,7 +58,8 @@ subsequent steps in the same job. `cache-address` matches that value.
 omni-cache supports multiple caching protocols:
 
 - **HTTP Cache** - Simple GET/PUT/POST for tools like Bazel, Gradle, cURL
-- **GitHub Actions Cache v1/v2** - Compatible with [cirruslabs/cache](https://github.com/cirruslabs/cache)
+- **GitHub Actions Cache v1/v2** - Compatible with
+  [cirruslabs/cache](https://github.com/cirruslabs/cache)
 - **Azure Blob** - For GHA v2 clients with range support
 - **LLVM Cache** - gRPC-based cache for Xcode/LLVM compilers
 
