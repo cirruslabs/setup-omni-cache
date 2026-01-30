@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as os from 'os'
 import * as fs from 'fs'
 import * as path from 'path'
-import { spawn } from 'child_process'
+import { execFile, spawn } from 'child_process'
 import { installOmniCache } from './install.js'
 import { displayLogs, readOmniCacheAddress } from './logs.js'
 
@@ -87,6 +87,40 @@ async function waitForOmniCacheAddress(
 }
 
 /**
+ * Fetch omni-cache version via the binary.
+ * @param {string} binaryPath - Path to omni-cache binary
+ * @returns {Promise<string>} Parsed version string or empty string
+ */
+async function getOmniCacheVersion(binaryPath) {
+  return await new Promise((resolve) => {
+    execFile(
+      binaryPath,
+      ['--version'],
+      { encoding: 'utf8' },
+      (error, stdout) => {
+        if (error) {
+          core.warning(`Failed to read omni-cache version: ${error.message}`)
+          return resolve('')
+        }
+
+        const output = (stdout || '').trim()
+        if (!output) {
+          return resolve('')
+        }
+
+        const match = output.match(/omni-cache version\s+(.+)/i)
+        if (match?.[1]) {
+          return resolve(match[1].trim())
+        }
+
+        const firstLine = output.split(/\r?\n/)[0].trim()
+        return resolve(firstLine)
+      }
+    )
+  })
+}
+
+/**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
@@ -104,10 +138,12 @@ export async function run() {
     // Install omni-cache
     const { path: binaryPath, version: installedVersion } =
       await installOmniCache(version)
+    const binaryVersion = await getOmniCacheVersion(binaryPath)
+    const resolvedVersion = binaryVersion || installedVersion
     if (version === 'latest') {
-      core.info(`Resolved omni-cache version: ${installedVersion}`)
+      core.info(`Resolved omni-cache version: ${resolvedVersion}`)
     }
-    core.setOutput('version', installedVersion)
+    core.setOutput('version', resolvedVersion)
 
     // Prepare environment variables for omni-cache
     const env = {

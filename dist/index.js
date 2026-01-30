@@ -35,7 +35,7 @@ import require$$1$4 from 'node:path';
 import require$$2$4 from 'node:timers';
 import require$$1$5 from 'node:dns';
 import require$$0$8 from 'string_decoder';
-import require$$2$5, { spawn } from 'child_process';
+import require$$2$5, { spawn, execFile } from 'child_process';
 import require$$6$2 from 'timers';
 import require$$9 from 'stream';
 
@@ -41046,6 +41046,40 @@ async function waitForOmniCacheAddress(
 }
 
 /**
+ * Fetch omni-cache version via the binary.
+ * @param {string} binaryPath - Path to omni-cache binary
+ * @returns {Promise<string>} Parsed version string or empty string
+ */
+async function getOmniCacheVersion(binaryPath) {
+  return await new Promise((resolve) => {
+    execFile(
+      binaryPath,
+      ['--version'],
+      { encoding: 'utf8' },
+      (error, stdout) => {
+        if (error) {
+          coreExports.warning(`Failed to read omni-cache version: ${error.message}`);
+          return resolve('')
+        }
+
+        const output = (stdout || '').trim();
+        if (!output) {
+          return resolve('')
+        }
+
+        const match = output.match(/omni-cache version\s+(.+)/i);
+        if (match?.[1]) {
+          return resolve(match[1].trim())
+        }
+
+        const firstLine = output.split(/\r?\n/)[0].trim();
+        return resolve(firstLine)
+      }
+    );
+  })
+}
+
+/**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
@@ -41063,10 +41097,12 @@ async function run() {
     // Install omni-cache
     const { path: binaryPath, version: installedVersion } =
       await installOmniCache(version);
+    const binaryVersion = await getOmniCacheVersion(binaryPath);
+    const resolvedVersion = binaryVersion || installedVersion;
     if (version === 'latest') {
-      coreExports.info(`Resolved omni-cache version: ${installedVersion}`);
+      coreExports.info(`Resolved omni-cache version: ${resolvedVersion}`);
     }
-    coreExports.setOutput('version', installedVersion);
+    coreExports.setOutput('version', resolvedVersion);
 
     // Prepare environment variables for omni-cache
     const env = {

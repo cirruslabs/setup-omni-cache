@@ -11,9 +11,11 @@ const mockInstall = {
 let mockChildInstance
 
 const mockSpawn = jest.fn()
+const mockExecFile = jest.fn()
 
 const mockChildProcess = {
-  spawn: mockSpawn
+  spawn: mockSpawn,
+  execFile: mockExecFile
 }
 
 const mockFs = {
@@ -55,6 +57,10 @@ describe('main.js', () => {
       unref: jest.fn()
     }
     mockSpawn.mockReturnValue(mockChildInstance)
+    mockExecFile.mockImplementation((file, args, opts, cb) => {
+      const callback = typeof opts === 'function' ? opts : cb
+      callback(null, 'omni-cache version 0.9.0-808310f\n', '')
+    })
 
     mockInstall.installOmniCache.mockResolvedValue({
       path: '/path/to/omni-cache',
@@ -127,7 +133,7 @@ describe('main.js', () => {
   it('sets version output', async () => {
     await run()
 
-    expect(core.setOutput).toHaveBeenCalledWith('version', 'v0.7.0')
+    expect(core.setOutput).toHaveBeenCalledWith('version', '0.9.0-808310f')
   })
 
   it('sets cache-socket output', async () => {
