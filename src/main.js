@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { spawn } from 'child_process'
 import { installOmniCache } from './install.js'
+import { displayLogs } from './logs.js'
 
 /**
  * Wait for omni-cache to become healthy
@@ -100,7 +101,12 @@ export async function run() {
     fs.closeSync(logFd)
 
     // Wait for omni-cache to be healthy
-    await waitForHealthy(host)
+    try {
+      await waitForHealthy(host)
+    } catch (error) {
+      displayLogs(logFile, 'omni-cache logs (startup)')
+      throw error
+    }
 
     // Set outputs
     const endpoint = host.startsWith('http') ? host : `http://${host}`

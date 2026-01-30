@@ -18,7 +18,9 @@ const mockChildProcess = {
 
 const mockFs = {
   openSync: jest.fn().mockReturnValue(3),
-  closeSync: jest.fn()
+  closeSync: jest.fn(),
+  existsSync: jest.fn().mockReturnValue(false),
+  readFileSync: jest.fn().mockReturnValue('')
 }
 
 const mockOs = {

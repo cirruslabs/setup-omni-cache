@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import * as fs from 'fs'
+import { displayLogs } from './logs.js'
 
 /**
  * Fetch and display cache statistics
@@ -99,27 +99,6 @@ async function shutdownOmniCache(pid) {
     } else {
       core.warning(`Error shutting down omni-cache: ${error.message}`)
     }
-  }
-}
-
-/**
- * Display log file contents if available
- * @param {string} logPath - Path to the log file
- */
-function displayLogs(logPath) {
-  if (!logPath) return
-
-  try {
-    if (fs.existsSync(logPath)) {
-      const logs = fs.readFileSync(logPath, 'utf8')
-      if (logs.trim()) {
-        core.startGroup('omni-cache logs')
-        core.info(logs)
-        core.endGroup()
-      }
-    }
-  } catch (error) {
-    core.debug(`Could not read log file: ${error.message}`)
   }
 }
 

@@ -38181,6 +38181,28 @@ function requireCore () {
 var coreExports = requireCore();
 
 /**
+ * Display log file contents if available
+ * @param {string} logPath - Path to the log file
+ * @param {string} title - Log group title
+ */
+function displayLogs(logPath, title = 'omni-cache logs') {
+  if (!logPath) return
+
+  try {
+    if (require$$1.existsSync(logPath)) {
+      const logs = require$$1.readFileSync(logPath, 'utf8');
+      if (logs.trim()) {
+        coreExports.startGroup(title);
+        coreExports.info(logs);
+        coreExports.endGroup();
+      }
+    }
+  } catch (error) {
+    coreExports.debug(`Could not read log file: ${error.message}`);
+  }
+}
+
+/**
  * Fetch and display cache statistics
  * @param {string} host - The omni-cache host address
  * @returns {Promise<object|null>} The stats object or null if unavailable
@@ -38278,27 +38300,6 @@ async function shutdownOmniCache(pid) {
     } else {
       coreExports.warning(`Error shutting down omni-cache: ${error.message}`);
     }
-  }
-}
-
-/**
- * Display log file contents if available
- * @param {string} logPath - Path to the log file
- */
-function displayLogs(logPath) {
-  if (!logPath) return
-
-  try {
-    if (require$$1.existsSync(logPath)) {
-      const logs = require$$1.readFileSync(logPath, 'utf8');
-      if (logs.trim()) {
-        coreExports.startGroup('omni-cache logs');
-        coreExports.info(logs);
-        coreExports.endGroup();
-      }
-    }
-  } catch (error) {
-    coreExports.debug(`Could not read log file: ${error.message}`);
   }
 }
 

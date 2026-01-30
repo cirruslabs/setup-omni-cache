@@ -40890,6 +40890,28 @@ async function installOmniCache(version) {
 }
 
 /**
+ * Display log file contents if available
+ * @param {string} logPath - Path to the log file
+ * @param {string} title - Log group title
+ */
+function displayLogs(logPath, title = 'omni-cache logs') {
+  if (!logPath) return
+
+  try {
+    if (fs.existsSync(logPath)) {
+      const logs = fs.readFileSync(logPath, 'utf8');
+      if (logs.trim()) {
+        coreExports.startGroup(title);
+        coreExports.info(logs);
+        coreExports.endGroup();
+      }
+    }
+  } catch (error) {
+    coreExports.debug(`Could not read log file: ${error.message}`);
+  }
+}
+
+/**
  * Wait for omni-cache to become healthy
  * @param {string} host - Host address to check
  * @param {number} maxAttempts - Maximum number of attempts
@@ -40984,7 +41006,12 @@ async function run() {
     fs.closeSync(logFd);
 
     // Wait for omni-cache to be healthy
-    await waitForHealthy(host);
+    try {
+      await waitForHealthy(host);
+    } catch (error) {
+      displayLogs(logFile, 'omni-cache logs (startup)');
+      throw error
+    }
 
     // Set outputs
     const endpoint = host.startsWith('http') ? host : `http://${host}`;
