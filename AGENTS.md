@@ -2,8 +2,9 @@
 
 ## Project Structure & Module Organization
 
-- `src/`: Action source (ESM). Entry points are `src/main.js` (main) and
-  `src/post.js` (post-run), bundled to `dist/`.
+- `src/`: Action source (ESM). Entry points are `src/index.js` (main) and
+  `src/post-index.js` (post-run), which invoke `src/main.js` and `src/post.js`,
+  bundled to `dist/`.
 - `dist/`: Built artifacts referenced by `action.yml` (`dist/index.js`,
   `dist/post.js`). Keep this in sync with source changes.
 - `__tests__/`: Jest tests (`*.test.js`); `__fixtures__/` holds test helpers.
@@ -13,20 +14,17 @@
 
 ## Build, Test, and Development Commands
 
-```bash
-npm install               # Install dependencies (Node >= 20;
-                          # .node-version pins 24.4.0)
-npm run bundle            # Format + build action into dist/
-npm run package           # Build dist/ only (Rollup)
-npm run package:watch     # Rebuild dist/ on changes
-npm run lint              # ESLint checks
-npm run format:check      # Prettier check
-npm run format:write      # Prettier fix
-npm test                  # Jest test run with coverage
-npm run coverage          # Update coverage badge
-npm run local-action      # Run action locally using .env
-npm run all               # Format, lint, test, coverage, build
-```
+- `npm install` — Install dependencies (Node >= 20; `.node-version` pins 24.4.0)
+- `npm run bundle` — Format + build action into `dist/`
+- `npm run package` — Build `dist/` only (Rollup)
+- `npm run package:watch` — Rebuild `dist/` on changes
+- `npm run lint` — ESLint checks
+- `npm run format:check` — Prettier check
+- `npm run format:write` — Prettier fix
+- `npm test` — Jest test run with coverage
+- `npm run coverage` — Update coverage badge
+- `npm run local-action` — Run action locally using `.env`
+- `npm run all` — Format, lint, test, coverage, build
 
 ## Coding Style & Naming Conventions
 

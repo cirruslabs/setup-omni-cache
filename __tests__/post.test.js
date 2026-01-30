@@ -37,6 +37,12 @@ jest.unstable_mockModule('fs', () => mockFs)
 // Mock global fetch
 global.fetch = jest.fn()
 
+const createFetchResponse = ({ ok = true, status = 200, body = '' } = {}) => ({
+  ok,
+  status,
+  text: () => Promise.resolve(body)
+})
+
 // Mock process.kill
 const originalKill = process.kill
 
@@ -70,10 +76,11 @@ describe('post.js', () => {
       return state[key] || ''
     })
 
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ hits: 100, misses: 50 })
-    })
+    global.fetch.mockResolvedValue(
+      createFetchResponse({
+        body: JSON.stringify({ hits: 100, misses: 50 })
+      })
+    )
 
     process.kill = jest.fn()
     // Process exits immediately after SIGTERM
@@ -172,15 +179,30 @@ describe('post.js', () => {
   })
 
   it('handles stats with zero total gracefully', async () => {
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ hits: 0, misses: 0 })
-    })
+    global.fetch.mockResolvedValue(
+      createFetchResponse({
+        body: JSON.stringify({ hits: 0, misses: 0 })
+      })
+    )
 
     await run()
 
     expect(core.info).toHaveBeenCalledWith(
       expect.stringContaining('Cache hit rate: 0%')
+    )
+  })
+
+  it('skips non-JSON stats responses without warning', async () => {
+    global.fetch.mockResolvedValue(
+      createFetchResponse({
+        body: 'omni-cache is running'
+      })
+    )
+
+    await run()
+
+    expect(core.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('Could not fetch cache statistics')
     )
   })
 })
