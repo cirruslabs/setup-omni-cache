@@ -13,7 +13,7 @@ import { displayLogs } from './logs.js'
  * @param {number} delayMs - Delay between attempts in milliseconds
  * @returns {Promise<boolean>}
  */
-async function waitForHealthy(host, maxAttempts = 30, delayMs = 1000) {
+async function waitForHealthy(host, maxAttempts = 10, delayMs = 1000) {
   const url = host.startsWith('http') ? host : `http://${host}`
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {

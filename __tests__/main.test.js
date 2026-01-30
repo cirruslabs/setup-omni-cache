@@ -149,7 +149,7 @@ describe('main.js', () => {
     expect(core.setFailed).toHaveBeenCalledWith(
       expect.stringContaining('failed to become healthy')
     )
-  }, 35000)
+  }, 15000)
 
   it('detaches child process', async () => {
     await run()
