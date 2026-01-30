@@ -38216,7 +38216,7 @@ function displayLogs(logPath, title = 'omni-cache logs') {
 /**
  * Fetch and display cache statistics
  * @param {string} host - The omni-cache host address
- * @returns {Promise<object|null>} The stats object or null if unavailable
+ * @returns {Promise<object|null>} The stats object when JSON is available, otherwise null
  */
 async function fetchStats(host) {
   const url = host.startsWith('http') ? host : `http://${host}`;
@@ -38226,16 +38226,17 @@ async function fetchStats(host) {
     if (response.ok) {
       const bodyText =
         typeof response.text === 'function' ? await response.text() : '';
-      const trimmed = (bodyText || '').replace(/^\uFEFF/, '').trim();
+      const cleaned = (bodyText || '').replace(/^\uFEFF/, '');
+      const trimmed = cleaned.trim();
       if (!trimmed) {
         coreExports.debug('omni-cache stats endpoint returned empty response');
         return null
       }
 
+      coreExports.info('=== omni-cache Statistics ===');
+      coreExports.info(cleaned);
+
       if (!/^[{[]/.test(trimmed)) {
-        coreExports.debug(
-          'omni-cache stats endpoint returned non-JSON response; skipping stats'
-        );
         return null
       }
 
@@ -38246,9 +38247,6 @@ async function fetchStats(host) {
         coreExports.warning(`Could not parse cache statistics JSON: ${error.message}`);
         return null
       }
-
-      coreExports.info('=== omni-cache Statistics ===');
-      coreExports.info(JSON.stringify(stats, null, 2));
 
       // Create a summary if hits/misses are available
       if (stats.hits !== undefined && stats.misses !== undefined) {
