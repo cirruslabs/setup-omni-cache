@@ -28,7 +28,8 @@ steps:
   # Your build steps can now use the cache endpoint
   - name: Build with cache
     run: |
-      # Configure your build tool to use the OMNI_CACHE_ADDRESS env var which is automatically exposed by cirruslabs/setup-omni-cache
+      # Configure your build tool to use the OMNI_CACHE_ADDRESS env var
+      # which is automatically exposed by cirruslabs/setup-omni-cache
       bazel build //... --remote_cache=http://$OMNI_CACHE_ADDRESS
 ```
 
