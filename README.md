@@ -29,8 +29,8 @@ steps:
   # Your build steps can now use the cache endpoint
   - name: Build with cache
     run: |
-      # Configure your build tool to use the cache endpoint output
-      bazel build //... --remote_cache=${{ steps.cache.outputs.cache-endpoint }}
+      # Configure your build tool to use the OMNI_CACHE_ADDRESS env var
+      bazel build //... --remote_cache=http://$OMNI_CACHE_ADDRESS
 ```
 
 ## Inputs
@@ -45,11 +45,14 @@ steps:
 
 ## Outputs
 
-| Output           | Description                                                      |
-| ---------------- | ---------------------------------------------------------------- |
-| `cache-endpoint` | The HTTP endpoint for the cache (e.g., `http://localhost:12321`) |
-| `cache-socket`   | The Unix socket path for the cache                               |
-| `version`        | The installed omni-cache version                                 |
+| Output          | Description                            |
+| --------------- | -------------------------------------- |
+| `cache-address` | The resolved cache address (host:port) |
+| `cache-socket`  | The Unix socket path for the cache     |
+| `version`       | The installed omni-cache version       |
+
+As a side effect, the action exports `OMNI_CACHE_ADDRESS` (host:port) for
+subsequent steps in the same job. `cache-address` matches that value.
 
 ## Supported Protocols
 
@@ -125,7 +128,7 @@ jobs:
       - name: Build
         run: |
           bazel build //... \
-            --remote_cache=${{ steps.cache.outputs.cache-endpoint }}
+            --remote_cache=http://$OMNI_CACHE_ADDRESS
 ```
 
 ## Development

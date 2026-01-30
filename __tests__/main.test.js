@@ -97,8 +97,8 @@ describe('main.js', () => {
     )
     expect(core.saveState).toHaveBeenCalledWith('omni-cache-pid', '12345')
     expect(core.setOutput).toHaveBeenCalledWith(
-      'cache-endpoint',
-      'http://127.0.0.1:12321'
+      'cache-address',
+      '127.0.0.1:12321'
     )
   })
 

@@ -29,9 +29,8 @@ inputs:
     default: 'latest'
 
 outputs:
-  cache-endpoint:
-    description:
-      'The HTTP endpoint for the cache (e.g., http://localhost:12321)'
+  cache-address:
+    description: 'The resolved cache address (host:port)'
   cache-socket:
     description: 'The Unix socket path for the cache'
   version:

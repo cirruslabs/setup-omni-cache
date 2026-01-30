@@ -41134,12 +41134,14 @@ async function run() {
     }
 
     // Set outputs
-    const endpoint = resolvedAddress
+    if (cacheAddress) {
+      coreExports.setOutput('cache-address', cacheAddress);
+    }
+    const endpoint = cacheAddress
       ? `http://${cacheAddress}`
       : host.startsWith('http')
         ? host
         : `http://${host}`;
-    coreExports.setOutput('cache-endpoint', endpoint);
 
     // Unix socket path
     const homeDir = os.homedir();
