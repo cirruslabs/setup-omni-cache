@@ -38181,25 +38181,36 @@ function requireCore () {
 var coreExports = requireCore();
 
 /**
+ * Read log file contents if available.
+ * @param {string} logPath - Path to the log file
+ * @returns {string} Log contents or empty string
+ */
+function readLogs(logPath) {
+  if (!logPath) return ''
+
+  try {
+    if (require$$1.existsSync(logPath)) {
+      return require$$1.readFileSync(logPath, 'utf8')
+    }
+  } catch (error) {
+    coreExports.debug(`Could not read log file: ${error.message}`);
+  }
+
+  return ''
+}
+
+/**
  * Display log file contents if available
  * @param {string} logPath - Path to the log file
  * @param {string} title - Log group title
  */
 function displayLogs(logPath, title = 'omni-cache logs') {
-  if (!logPath) return
+  const logs = readLogs(logPath);
+  if (!logs.trim()) return
 
-  try {
-    if (require$$1.existsSync(logPath)) {
-      const logs = require$$1.readFileSync(logPath, 'utf8');
-      if (logs.trim()) {
-        coreExports.startGroup(title);
-        coreExports.info(logs);
-        coreExports.endGroup();
-      }
-    }
-  } catch (error) {
-    coreExports.debug(`Could not read log file: ${error.message}`);
-  }
+  coreExports.startGroup(title);
+  coreExports.info(logs);
+  coreExports.endGroup();
 }
 
 /**

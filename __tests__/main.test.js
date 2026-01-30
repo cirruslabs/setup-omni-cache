@@ -75,6 +75,10 @@ describe('main.js', () => {
     mockFs.openSync.mockReturnValue(3)
     mockOs.tmpdir.mockReturnValue('/tmp')
     mockOs.homedir.mockReturnValue('/home/user')
+    mockFs.existsSync.mockReturnValue(true)
+    mockFs.readFileSync.mockReturnValue(
+      'time=2026-01-30T12:34:56Z level=INFO msg="omni-cache started" addr=127.0.0.1:12321 socket=/home/user/.cirruslabs/omni-cache.sock bucket=test-bucket'
+    )
 
     // Mock successful health check
     global.fetch.mockResolvedValue({ ok: true })
@@ -94,7 +98,7 @@ describe('main.js', () => {
     expect(core.saveState).toHaveBeenCalledWith('omni-cache-pid', '12345')
     expect(core.setOutput).toHaveBeenCalledWith(
       'cache-endpoint',
-      'http://localhost:12321'
+      'http://127.0.0.1:12321'
     )
   })
 
@@ -109,6 +113,15 @@ describe('main.js', () => {
     expect(env.OMNI_CACHE_PREFIX).toBe('test-prefix')
     expect(env.OMNI_CACHE_HOST).toBe('localhost:12321')
     expect(env.OMNI_CACHE_S3_ENDPOINT).toBe('https://s3.example.com')
+  })
+
+  it('exports OMNI_CACHE_ADDRESS', async () => {
+    await run()
+
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'OMNI_CACHE_ADDRESS',
+      '127.0.0.1:12321'
+    )
   })
 
   it('sets version output', async () => {

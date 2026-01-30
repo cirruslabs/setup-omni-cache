@@ -4,7 +4,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { spawn } from 'child_process'
 import { installOmniCache } from './install.js'
-import { displayLogs } from './logs.js'
+import { displayLogs, readOmniCacheAddress } from './logs.js'
 
 /**
  * Wait for omni-cache to become healthy
@@ -37,6 +37,53 @@ async function waitForHealthy(host, maxAttempts = 10, delayMs = 1000) {
   throw new Error(
     `omni-cache failed to become healthy after ${maxAttempts} attempts`
   )
+}
+
+/**
+ * Normalize a host string into a host:port address.
+ * @param {string} host - Input host or URL
+ * @returns {string} Normalized address
+ */
+function normalizeAddress(host) {
+  const trimmed = (host || '').trim()
+  if (!trimmed) return ''
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      return new URL(trimmed).host
+    } catch {
+      return trimmed.replace(/^https?:\/\//, '')
+    }
+  }
+
+  return trimmed
+}
+
+/**
+ * Wait for omni-cache to log the resolved listen address.
+ * @param {string} logFile - Log file path
+ * @param {number} maxAttempts - Maximum number of attempts
+ * @param {number} delayMs - Delay between attempts in milliseconds
+ * @returns {Promise<string>} The resolved address or empty string
+ */
+async function waitForOmniCacheAddress(
+  logFile,
+  maxAttempts = 20,
+  delayMs = 250
+) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const address = readOmniCacheAddress(logFile)
+    if (address) {
+      core.info(`Resolved omni-cache address from logs: ${address}`)
+      return address
+    }
+
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
+
+  return ''
 }
 
 /**
@@ -89,7 +136,6 @@ export async function run() {
     // Save PID for the post action to use
     const pid = child.pid
     core.saveState('omni-cache-pid', pid.toString())
-    core.saveState('omni-cache-host', host)
     core.saveState('omni-cache-log', logFile)
 
     core.info(`omni-cache started with PID ${pid}`)
@@ -100,16 +146,40 @@ export async function run() {
     // Close log file descriptor in parent process
     fs.closeSync(logFd)
 
+    const resolvedAddress = await waitForOmniCacheAddress(logFile)
+    const fallbackAddress = normalizeAddress(host)
+    const cacheAddress = resolvedAddress || fallbackAddress
+
+    if (!cacheAddress) {
+      core.warning('Could not resolve omni-cache address from logs')
+    } else if (!resolvedAddress) {
+      core.warning(
+        `Could not resolve omni-cache address from logs, using ${cacheAddress}`
+      )
+    }
+
+    if (cacheAddress) {
+      core.exportVariable('OMNI_CACHE_ADDRESS', cacheAddress)
+    }
+
+    core.saveState('omni-cache-host', cacheAddress || host)
+
+    const healthHost = resolvedAddress ? cacheAddress : host
+
     // Wait for omni-cache to be healthy
     try {
-      await waitForHealthy(host)
+      await waitForHealthy(healthHost)
     } catch (error) {
       displayLogs(logFile, 'omni-cache logs (startup)')
       throw error
     }
 
     // Set outputs
-    const endpoint = host.startsWith('http') ? host : `http://${host}`
+    const endpoint = resolvedAddress
+      ? `http://${cacheAddress}`
+      : host.startsWith('http')
+        ? host
+        : `http://${host}`
     core.setOutput('cache-endpoint', endpoint)
 
     // Unix socket path
