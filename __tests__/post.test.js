@@ -192,7 +192,7 @@ describe('post.js', () => {
     )
   })
 
-  it('skips non-JSON stats responses without warning', async () => {
+  it('prints non-JSON stats responses without warning', async () => {
     global.fetch.mockResolvedValue(
       createFetchResponse({
         body: 'omni-cache is running'
@@ -201,6 +201,7 @@ describe('post.js', () => {
 
     await run()
 
+    expect(core.info).toHaveBeenCalledWith('omni-cache is running')
     expect(core.warning).not.toHaveBeenCalledWith(
       expect.stringContaining('Could not fetch cache statistics')
     )
