@@ -7,9 +7,8 @@ A GitHub Action to install and run
 [omni-cache](https://github.com/cirruslabs/omni-cache) as a background sidecar
 for CI caching.
 
-omni-cache is a multi-protocol cache sidecar that proxies cache requests to S3,
-keeping cache traffic local to the runner and eliminating the need for tools to
-have direct S3 credentials.
+omni-cache is a multi-protocol cache sidecar that proxies cache requests
+directly to an S3-compatible storage. Ideal for self-hosted runners.
 
 ## Usage
 
@@ -20,7 +19,7 @@ steps:
     uses: cirruslabs/setup-omni-cache@v1
     with:
       bucket: ci-omni-cache
-      s3-endpoint: ${{ secrets.S3_ENDPOINT }}
+      s3-endpoint: ${{ secrets.S3_ENDPOINT }} # can be R2, for example
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -30,6 +29,7 @@ steps:
   - name: Build with cache
     run: |
       # Configure your build tool to use the OMNI_CACHE_ADDRESS env var
+      # which is automatically exposed by cirruslabs/setup-omni-cache
       bazel build //... --remote_cache=http://$OMNI_CACHE_ADDRESS
 ```
 
@@ -59,7 +59,8 @@ subsequent steps in the same job. `cache-address` matches that value.
 omni-cache supports multiple caching protocols:
 
 - **HTTP Cache** - Simple GET/PUT/POST for tools like Bazel, Gradle, cURL
-- **GitHub Actions Cache v1/v2** - Compatible with actions/cache
+- **GitHub Actions Cache v1/v2** - Compatible with
+  [cirruslabs/cache](https://github.com/cirruslabs/cache)
 - **Azure Blob** - For GHA v2 clients with range support
 - **LLVM Cache** - gRPC-based cache for Xcode/LLVM compilers
 
@@ -100,7 +101,7 @@ steps:
       aws-region: us-east-1
 
   - name: Setup omni-cache
-    uses: cirruslabs/setup-omni-cache@v1
+    uses: cirruslabs/setup-omni-cache@v1.0.1
     with:
       bucket: my-cache-bucket
 ```
@@ -116,7 +117,7 @@ jobs:
 
       - name: Setup omni-cache
         id: cache
-        uses: cirruslabs/setup-omni-cache@v1
+        uses: cirruslabs/setup-omni-cache@v1.0.1
         with:
           bucket: my-bazel-cache
           prefix: bazel/
