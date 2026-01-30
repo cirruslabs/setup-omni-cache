@@ -96,7 +96,17 @@ describe('main.js', () => {
     expect(mockInstall.installOmniCache).toHaveBeenCalledWith('latest')
     expect(mockSpawn).toHaveBeenCalledWith(
       '/path/to/omni-cache',
-      ['sidecar'],
+      [
+        'sidecar',
+        '--bucket',
+        'test-bucket',
+        '--listen-addr',
+        'localhost:12321',
+        '--prefix',
+        'test-prefix',
+        '--s3-endpoint',
+        'https://s3.example.com'
+      ],
       expect.objectContaining({
         detached: true
       })

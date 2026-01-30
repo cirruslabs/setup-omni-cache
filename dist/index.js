@@ -41125,7 +41125,15 @@ async function run() {
     // Start omni-cache in the background
     coreExports.info(`Starting omni-cache sidecar...`);
 
-    const child = spawn(binaryPath, ['sidecar'], {
+    const args = ['sidecar', '--bucket', bucket, '--listen-addr', host];
+    if (prefix) {
+      args.push('--prefix', prefix);
+    }
+    if (s3Endpoint) {
+      args.push('--s3-endpoint', s3Endpoint);
+    }
+
+    const child = spawn(binaryPath, args, {
       env,
       detached: true,
       stdio: ['ignore', logFd, logFd]
