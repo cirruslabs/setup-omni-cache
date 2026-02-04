@@ -31,17 +31,13 @@ const mockFs = {
   readFileSync: jest.fn()
 }
 
+const execFileMock = jest.fn()
+
 jest.unstable_mockModule('@actions/core', () => core)
 jest.unstable_mockModule('fs', () => mockFs)
-
-// Mock global fetch
-global.fetch = jest.fn()
-
-const createFetchResponse = ({ ok = true, status = 200, body = '' } = {}) => ({
-  ok,
-  status,
-  text: () => Promise.resolve(body)
-})
+jest.unstable_mockModule('child_process', () => ({
+  execFile: execFileMock
+}))
 
 // Mock process.kill
 const originalKill = process.kill
@@ -76,11 +72,9 @@ describe('post.js', () => {
       return state[key] || ''
     })
 
-    global.fetch.mockResolvedValue(
-      createFetchResponse({
-        body: JSON.stringify({ hits: 100, misses: 50 })
-      })
-    )
+    execFileMock.mockImplementation((file, args, callback) => {
+      callback(null, JSON.stringify({ hits: 100, misses: 50 }), '')
+    })
 
     process.kill = jest.fn()
     // Process exits immediately after SIGTERM
@@ -100,8 +94,15 @@ describe('post.js', () => {
   it('fetches and displays stats', async () => {
     await run()
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:12321/metrics/cache'
+    expect(execFileMock).toHaveBeenCalledWith(
+      'curl',
+      [
+        '-s',
+        '-H',
+        'Accept: application/vnd.github-actions',
+        'http://localhost:12321/stats'
+      ],
+      expect.any(Function)
     )
     expect(core.info).toHaveBeenCalledWith(
       expect.stringContaining('omni-cache Statistics')
@@ -144,7 +145,9 @@ describe('post.js', () => {
   })
 
   it('warns but does not fail on stats fetch error', async () => {
-    global.fetch.mockRejectedValue(new Error('Connection refused'))
+    execFileMock.mockImplementation((file, args, callback) => {
+      callback(new Error('Connection refused'))
+    })
 
     await run()
 
@@ -181,11 +184,9 @@ describe('post.js', () => {
   })
 
   it('handles stats with zero total gracefully', async () => {
-    global.fetch.mockResolvedValue(
-      createFetchResponse({
-        body: JSON.stringify({ hits: 0, misses: 0 })
-      })
-    )
+    execFileMock.mockImplementation((file, args, callback) => {
+      callback(null, JSON.stringify({ hits: 0, misses: 0 }), '')
+    })
 
     await run()
 
@@ -195,11 +196,9 @@ describe('post.js', () => {
   })
 
   it('prints non-JSON stats responses without warning', async () => {
-    global.fetch.mockResolvedValue(
-      createFetchResponse({
-        body: 'omni-cache is running'
-      })
-    )
+    execFileMock.mockImplementation((file, args, callback) => {
+      callback(null, 'omni-cache is running', '')
+    })
 
     await run()
 
