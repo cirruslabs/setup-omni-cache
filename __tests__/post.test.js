@@ -103,9 +103,9 @@ describe('post.js', () => {
     expect(global.fetch).toHaveBeenCalledWith(
       'http://localhost:12321/metrics/cache',
       {
-      headers: {
-        Accept: 'application/vnd.github-actions'
-      }
+        headers: {
+          Accept: 'application/vnd.github-actions'
+        }
       }
     )
     expect(core.info).toHaveBeenCalledWith(
