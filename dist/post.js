@@ -1,4 +1,3 @@
-import { execFile } from 'child_process';
 import * as os from 'os';
 import os__default, { EOL } from 'os';
 import 'crypto';
@@ -35,6 +34,7 @@ import require$$1$4 from 'node:path';
 import require$$2$3 from 'node:timers';
 import require$$1$5 from 'node:dns';
 import 'string_decoder';
+import 'child_process';
 import 'timers';
 
 // We use any as a valid input type
@@ -35774,27 +35774,6 @@ function displayLogs(logPath, title = 'omni-cache logs') {
   endGroup();
 }
 
-const runCurl = (args) =>
-  new Promise((resolve, reject) => {
-    execFile('curl', args, (error, stdout, stderr) => {
-      if (error) {
-        if (stderr) {
-          error.stderr =
-            typeof stderr === 'string' ? stderr : stderr.toString('utf8');
-        }
-        reject(error);
-        return
-      }
-
-      if (!stdout) {
-        resolve('');
-        return
-      }
-
-      resolve(typeof stdout === 'string' ? stdout : stdout.toString('utf8'));
-    });
-  });
-
 /**
  * Fetch and display cache statistics
  * @param {string} host - The omni-cache host address
@@ -35805,58 +35784,63 @@ async function fetchStats(host) {
   const statsUrl = `${url}/stats`;
 
   try {
-    const bodyText = await runCurl([
-      '-s',
-      '-H',
-      'Accept: application/vnd.github-actions',
-      statsUrl
-    ]);
-    const cleaned = (bodyText || '').replace(/^\uFEFF/, '');
-    const trimmed = cleaned.trim();
-    if (!trimmed) {
-      debug('omni-cache stats endpoint returned empty response');
-      return null
+    const response = await fetch(statsUrl, {
+      headers: {
+        Accept: 'application/vnd.github-actions'
+      }
+    });
+    if (response.ok) {
+      const bodyText =
+        typeof response.text === 'function' ? await response.text() : '';
+      const cleaned = (bodyText || '').replace(/^\uFEFF/, '');
+      const trimmed = cleaned.trim();
+      if (!trimmed) {
+        debug('omni-cache stats endpoint returned empty response');
+        return null
+      }
+
+      info('=== omni-cache Statistics ===');
+      info(cleaned);
+
+      if (!/^[{[]/.test(trimmed)) {
+        return null
+      }
+
+      let stats;
+      try {
+        stats = JSON.parse(trimmed);
+      } catch (error) {
+        warning(`Could not parse cache statistics JSON: ${error.message}`);
+        return null
+      }
+
+      // Create a summary if hits/misses are available
+      if (stats.hits !== undefined && stats.misses !== undefined) {
+        const total = stats.hits + stats.misses;
+        const hitRate = total > 0 ? ((stats.hits / total) * 100).toFixed(1) : 0;
+        info(
+          `Cache hit rate: ${hitRate}% (${stats.hits} hits, ${stats.misses} misses)`
+        );
+
+        // Add to job summary
+        await summary
+          .addHeading('omni-cache Statistics', 2)
+          .addTable([
+            [
+              { data: 'Metric', header: true },
+              { data: 'Value', header: true }
+            ],
+            ['Cache Hits', stats.hits.toString()],
+            ['Cache Misses', stats.misses.toString()],
+            ['Hit Rate', `${hitRate}%`]
+          ])
+          .write();
+      }
+
+      return stats
+    } else {
+      warning(`Failed to fetch stats: HTTP ${response.status}`);
     }
-
-    info('=== omni-cache Statistics ===');
-    info(cleaned);
-
-    if (!/^[{[]/.test(trimmed)) {
-      return null
-    }
-
-    let stats;
-    try {
-      stats = JSON.parse(trimmed);
-    } catch (error) {
-      warning(`Could not parse cache statistics JSON: ${error.message}`);
-      return null
-    }
-
-    // Create a summary if hits/misses are available
-    if (stats.hits !== undefined && stats.misses !== undefined) {
-      const total = stats.hits + stats.misses;
-      const hitRate = total > 0 ? ((stats.hits / total) * 100).toFixed(1) : 0;
-      info(
-        `Cache hit rate: ${hitRate}% (${stats.hits} hits, ${stats.misses} misses)`
-      );
-
-      // Add to job summary
-      await summary
-        .addHeading('omni-cache Statistics', 2)
-        .addTable([
-          [
-            { data: 'Metric', header: true },
-            { data: 'Value', header: true }
-          ],
-          ['Cache Hits', stats.hits.toString()],
-          ['Cache Misses', stats.misses.toString()],
-          ['Hit Rate', `${hitRate}%`]
-        ])
-        .write();
-    }
-
-    return stats
   } catch (error) {
     warning(`Could not fetch cache statistics: ${error.message}`);
   }
