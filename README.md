@@ -101,7 +101,7 @@ steps:
       aws-region: us-east-1
 
   - name: Setup omni-cache
-    uses: cirruslabs/setup-omni-cache@v1.1.0
+    uses: cirruslabs/setup-omni-cache@v1.1.1
     with:
       bucket: my-cache-bucket
 ```
@@ -117,7 +117,7 @@ jobs:
 
       - name: Setup omni-cache
         id: cache
-        uses: cirruslabs/setup-omni-cache@v1.1.0
+        uses: cirruslabs/setup-omni-cache@v1.1.1
         with:
           bucket: my-bazel-cache
           prefix: bazel/
