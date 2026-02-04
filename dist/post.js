@@ -35781,9 +35781,14 @@ function displayLogs(logPath, title = 'omni-cache logs') {
  */
 async function fetchStats(host) {
   const url = host.startsWith('http') ? host : `http://${host}`;
+  const statsUrl = `${url}/stats`;
 
   try {
-    const response = await fetch(`${url}/metrics/cache`);
+    const response = await fetch(statsUrl, {
+      headers: {
+        Accept: 'application/vnd.github-actions'
+      }
+    });
     if (response.ok) {
       const bodyText =
         typeof response.text === 'function' ? await response.text() : '';
