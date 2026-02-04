@@ -100,7 +100,9 @@ describe('post.js', () => {
   it('fetches and displays stats', async () => {
     await run()
 
-    expect(global.fetch).toHaveBeenCalledWith('http://localhost:12321/stats')
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:12321/metrics/cache'
+    )
     expect(core.info).toHaveBeenCalledWith(
       expect.stringContaining('omni-cache Statistics')
     )

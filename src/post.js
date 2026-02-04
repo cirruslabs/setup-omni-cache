@@ -10,7 +10,7 @@ async function fetchStats(host) {
   const url = host.startsWith('http') ? host : `http://${host}`
 
   try {
-    const response = await fetch(`${url}/stats`)
+    const response = await fetch(`${url}/metrics/cache`)
     if (response.ok) {
       const bodyText =
         typeof response.text === 'function' ? await response.text() : ''
