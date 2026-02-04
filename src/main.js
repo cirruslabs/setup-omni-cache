@@ -18,7 +18,7 @@ async function waitForHealthy(host, maxAttempts = 10, delayMs = 1000) {
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const response = await fetch(`${url}/stats`)
+      const response = await fetch(`${url}/metrics/cache`)
       if (response.ok) {
         core.info(`omni-cache is healthy after ${attempt} attempt(s)`)
         return true
