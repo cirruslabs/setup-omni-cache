@@ -69,8 +69,8 @@ omni-cache supports multiple caching protocols:
 When the workflow job completes, the action automatically:
 
 1. Fetches and displays cache statistics (hits, misses, hit rate)
-2. Adds an annotation to the GitHub job
-3. Gracefully shuts down the omni-cache process
+1. Adds an annotation to the GitHub job
+1. Gracefully shuts down the omni-cache process
 
 ![github-annotations.png](github-annotations.png)
 
