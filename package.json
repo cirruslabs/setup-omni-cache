@@ -1,7 +1,7 @@
 {
   "name": "setup-omni-cache",
   "description": "GitHub Action to install and run omni-cache as a background sidecar",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "author": "Cirrus Labs",
   "type": "module",
   "private": true,

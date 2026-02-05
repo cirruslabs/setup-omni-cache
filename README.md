@@ -16,7 +16,7 @@ directly to an S3-compatible storage. Ideal for self-hosted runners.
 steps:
   - name: Setup omni-cache
     id: cache
-    uses: cirruslabs/setup-omni-cache@v1
+    uses: cirruslabs/setup-omni-cache@v1.2.0
     with:
       bucket: ci-omni-cache
       s3-endpoint: ${{ secrets.S3_ENDPOINT }} # can be R2, for example
@@ -69,8 +69,10 @@ omni-cache supports multiple caching protocols:
 When the workflow job completes, the action automatically:
 
 1. Fetches and displays cache statistics (hits, misses, hit rate)
-1. Adds a summary table to the GitHub job summary
+1. Adds an annotation to the GitHub job
 1. Gracefully shuts down the omni-cache process
+
+![github-annotations.png](github-annotations.png)
 
 ## AWS Configuration
 
@@ -101,7 +103,7 @@ steps:
       aws-region: us-east-1
 
   - name: Setup omni-cache
-    uses: cirruslabs/setup-omni-cache@v1.1.1
+    uses: cirruslabs/setup-omni-cache@v1.2.0
     with:
       bucket: my-cache-bucket
 ```
@@ -117,7 +119,7 @@ jobs:
 
       - name: Setup omni-cache
         id: cache
-        uses: cirruslabs/setup-omni-cache@v1.1.1
+        uses: cirruslabs/setup-omni-cache@v1.2.0
         with:
           bucket: my-bazel-cache
           prefix: bazel/
